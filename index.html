@@ -377,6 +377,51 @@ const engine = new Engine(GODOT_CONFIG);
 })();
 </script>
 
+
+<script>
+(function () {
+	// Android Chrome's URL bar overlays the top of the canvas in landscape,
+	// which on a handheld crops the board. Going fullscreen on the first touch
+	// reclaims it.
+	//
+	// Notes on the awkward bits:
+	//  - it must run inside a genuine user-gesture handler, so this is wired to
+	//    the DOM rather than driven from the engine;
+	//  - it targets documentElement, NOT the canvas, or the prize-draw overlay
+	//    (a sibling of the canvas) would be hidden while fullscreen;
+	//  - touch devices only, so desktop players are not yanked into fullscreen
+	//    by an ordinary click;
+	//  - orientation is deliberately NOT locked - portrait plays fine and
+	//    forcing a rotation would be worse than the problem;
+	//  - iOS Safari has no element fullscreen and will simply ignore all this.
+	var coarse = (navigator.maxTouchPoints || 0) > 0 ||
+		(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+	if (!coarse) { return; }
+
+	var userLeft = false;
+
+	function goFullscreen() {
+		if (userLeft) { return; }
+		if (document.fullscreenElement || document.webkitFullscreenElement) { return; }
+		var el = document.documentElement;
+		var req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+		if (!req) { return; }
+		try {
+			var p = req.call(el);
+			if (p && p.catch) { p.catch(function () {}); }
+		} catch (e) { /* not permitted in this context - try again next gesture */ }
+	}
+
+	// If they deliberately leave fullscreen, respect it and stop asking.
+	document.addEventListener("fullscreenchange", function () {
+		if (!document.fullscreenElement) { userLeft = true; }
+	});
+
+	window.addEventListener("touchend", goFullscreen, { passive: true });
+	window.addEventListener("pointerup", goFullscreen, { passive: true });
+})();
+</script>
+
 	</body>
 </html>
 
