@@ -394,9 +394,13 @@ const engine = new Engine(GODOT_CONFIG);
 	//  - orientation is deliberately NOT locked - portrait plays fine and
 	//    forcing a rotation would be worse than the problem;
 	//  - iOS Safari has no element fullscreen and will simply ignore all this.
-	var coarse = (navigator.maxTouchPoints || 0) > 0 ||
-		(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
-	if (!coarse) { return; }
+	// Touch-PRIMARY only. maxTouchPoints > 0 is true of any touchscreen laptop
+	// or 2-in-1, so it is not enough on its own: a device with a mouse reports
+	// hover:hover, and that is what separates a handheld from a desktop that
+	// happens to have a touchscreen.
+	var mq = window.matchMedia;
+	if (!mq) { return; }
+	if (!(mq("(pointer: coarse)").matches && mq("(hover: none)").matches)) { return; }
 
 	var userLeft = false;
 
@@ -417,8 +421,9 @@ const engine = new Engine(GODOT_CONFIG);
 		if (!document.fullscreenElement) { userLeft = true; }
 	});
 
+	// touchend only. pointerup also fires for a mouse, which is how this
+	// managed to trigger on desktop.
 	window.addEventListener("touchend", goFullscreen, { passive: true });
-	window.addEventListener("pointerup", goFullscreen, { passive: true });
 })();
 </script>
 
