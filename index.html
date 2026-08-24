@@ -111,7 +111,7 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":325096,"index.wasm":37695054},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":326248,"index.wasm":37695054},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -325,20 +325,24 @@ const engine = new Engine(GODOT_CONFIG);
 		el("ck-status").className = "";
 		el("ck-status").textContent = "Sending...";
 
+		// Posted through the Edge Function, not straight at the database: the
+		// browser has no write credential any more. cfg.token is the signed,
+		// single-use session issued when the round started.
 		var body = {
+			action: "entry",
+			token: cfg.token,
 			initials: cfg.initials, full_name: name, email: email,
 			score: cfg.score, boards: cfg.boards
 		};
 		var ctrl = new AbortController();
 		var timer = setTimeout(function () { ctrl.abort(); }, 8000);
 
-		fetch(cfg.url + "/rest/v1/contest_entries", {
+		fetch(cfg.url, {
 			method: "POST",
 			headers: {
 				"apikey": cfg.key,
 				"Authorization": "Bearer " + cfg.key,
-				"Content-Type": "application/json",
-				"Prefer": "return=minimal"
+				"Content-Type": "application/json"
 			},
 			body: JSON.stringify(body),
 			signal: ctrl.signal
@@ -350,7 +354,9 @@ const engine = new Engine(GODOT_CONFIG);
 				s.className = "ck-ok";
 				setTimeout(function () { API.close("submitted"); }, 1400);
 			} else {
-				return r.text().then(function (t) { fail("Could not send (" + r.status + ")."); });
+				if (r.status === 409) { fail("This score has already been entered."); return; }
+				if (r.status === 400 || r.status === 401) { fail("Sorry - this entry could not be verified."); return; }
+				return r.text().then(function () { fail("Could not send (" + r.status + ")."); });
 			}
 		}).catch(function () {
 			clearTimeout(timer);
