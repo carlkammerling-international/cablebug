@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://cwp48e53h7xal"]
+
+[ext_resource type="Texture2D" uid="uid://xcsiyfea5c8x" path="res://assets/sprites/Sprite-0004.png" id="1_6rd4r"]
+[ext_resource type="Script" uid="uid://c1nr85p7h6cp1" path="res://scripts/pellet.gd" id="1_cesqr"]
+[ext_resource type="AudioStream" uid="uid://lh7vunxyve6h" path="res://assets/audio/pickupCoin.wav" id="3_nf1bb"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_cesqr"]
+radius = 2.0
+
+[node name="pellet" type="Node2D" unique_id=1921508704]
+script = ExtResource("1_cesqr")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=2136961839]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1275519795]
+visible = false
+shape = SubResource("CircleShape2D_cesqr")
+
+[node name="Sprite0004" type="Sprite2D" parent="." unique_id=1321357089]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_6rd4r")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=406533960]
+stream = ExtResource("3_nf1bb")
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://bcfwdravppfqu"]
+
+[ext_resource type="Script" uid="uid://dvi3kugdpjx8d" path="res://scripts/item.gd" id="1_ys7tt"]
+[ext_resource type="Texture2D" uid="uid://ckwwcr874jtne" path="res://assets/sprites/holesaw.png" id="2_unjj8"]
+[ext_resource type="Texture2D" uid="uid://vlvbms1qya4m" path="res://assets/sprites/redline.png" id="3_7u88n"]
+[ext_resource type="Texture2D" uid="uid://7omq8udfo3vq" path="res://assets/sprites/sporck.png" id="4_tfp68"]
+[ext_resource type="AudioStream" uid="uid://djphvo8081g67" path="res://assets/audio/blipSelect.wav" id="5_fruit"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_p0x8t"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_unjj8")
+}],
+"loop": true,
+"name": &"holesaw",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_7u88n")
+}],
+"loop": true,
+"name": &"redline",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_tfp68")
+}],
+"loop": true,
+"name": &"sporck",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b0ia4"]
+size = Vector2(16, 16)
+
+[node name="Node2D" type="Node2D" unique_id=711682019]
+script = ExtResource("1_ys7tt")
+
+[node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=1367356688]
+visible = false
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_p0x8t")
+animation = &"holesaw"
+
+[node name="Timer" type="Timer" parent="." unique_id=1912284152]
+wait_time = 5.0
+one_shot = true
+autostart = true
+
+[node name="Area2D" type="Area2D" parent="." unique_id=279101795]
+collision_layer = 2
+collision_mask = 2
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=130076805]
+shape = SubResource("RectangleShape2D_b0ia4")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=279101796]
+stream = ExtResource("5_fruit")
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

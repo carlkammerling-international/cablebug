@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://163vg8aoq5vh"]
+
+[ext_resource type="Script" uid="uid://b2qoxpuafr6d0" path="res://scripts/spark.gd" id="1_6bmde"]
+[ext_resource type="Texture2D" uid="uid://dsyn84t62am4l" path="res://assets/sprites/spark.png" id="1_bge2m"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_6bmde"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_bge2m")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hxtne"]
+size = Vector2(12, 12)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6bmde"]
+size = Vector2(12, 12)
+
+
+[node name="blinky" type="CharacterBody2D" unique_id=1677941681]
+collision_layer = 32
+collision_mask = 16
+script = ExtResource("1_6bmde")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1050823640]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_6bmde")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1888535610]
+shape = SubResource("RectangleShape2D_hxtne")
+
+[node name="rayUp" type="RayCast2D" parent="." unique_id=1662491965]
+target_position = Vector2(0, -15)
+collision_mask = 16
+collide_with_areas = true
+
+[node name="rayDown" type="RayCast2D" parent="." unique_id=1523398340]
+target_position = Vector2(0, 15)
+collision_mask = 16
+collide_with_areas = true
+
+[node name="rayLeft" type="RayCast2D" parent="." unique_id=1979595900]
+target_position = Vector2(-15, 0)
+collision_mask = 16
+collide_with_areas = true
+
+[node name="rayRight" type="RayCast2D" parent="." unique_id=1454354487]
+target_position = Vector2(15, 0)
+collision_mask = 16
+collide_with_areas = true
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1063211069]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1971923824]
+shape = SubResource("RectangleShape2D_6bmde")
+
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

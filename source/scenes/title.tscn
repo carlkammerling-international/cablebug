@@ -1,0 +1,98 @@
+[gd_scene format=3 uid="uid://cid6qc774xmma"]
+
+[ext_resource type="Script" uid="uid://bnwe3rcng4imo" path="res://scripts/title.gd" id="1_title"]
+[ext_resource type="FontFile" uid="uid://dsrrf3a8cqq0h" path="res://assets/fonts/upheavtt.ttf" id="2_font"]
+[ext_resource type="FontFile" uid="uid://crgtdwn2o6qft" path="res://assets/fonts/C&C Red Alert [INET].ttf" id="3_kpexm"]
+[ext_resource type="Texture2D" uid="uid://ddh1cna8er88u" path="res://assets/sprites/bug.png" id="4_3xoar"]
+[ext_resource type="Texture2D" uid="uid://b0kib78ttda6c" path="res://assets/sprites/Sprite-0001.png" id="5_mom7w"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_big"]
+font = ExtResource("2_font")
+font_size = 52
+font_color = Color(1, 0.85, 0.1, 1)
+outline_size = 7
+outline_color = Color(1, 0.09019608, 0, 1)
+stacked_outline_count = 1
+stacked_outline_0/size = 11
+
+[sub_resource type="LabelSettings" id="LabelSettings_sub"]
+font = ExtResource("3_kpexm")
+font_size = 12
+
+[sub_resource type="LabelSettings" id="LabelSettings_best"]
+font = ExtResource("3_kpexm")
+font_size = 12
+font_color = Color(0.6, 1, 1, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_small"]
+font = ExtResource("3_kpexm")
+font_size = 14
+font_color = Color(0.65, 0.65, 0.65, 1)
+
+[node name="title" type="Node2D" unique_id=556686326]
+script = ExtResource("1_title")
+
+[node name="logo" type="Label" parent="." unique_id=2099355688]
+offset_top = 166.0
+offset_right = 320.0
+offset_bottom = 261.0
+text = "cable bug"
+label_settings = SubResource("LabelSettings_big")
+horizontal_alignment = 1
+
+[node name="subtitle" type="Label" parent="." unique_id=263363546]
+texture_filter = 1
+offset_left = 72.0
+offset_top = 244.0
+offset_right = 392.0
+offset_bottom = 270.0
+text = "2026, Carl Kammerling International"
+label_settings = SubResource("LabelSettings_sub")
+horizontal_alignment = 1
+
+[node name="best" type="Label" parent="." unique_id=1675667122]
+texture_filter = 1
+offset_left = -108.0
+offset_top = 244.0
+offset_right = 212.0
+offset_bottom = 264.0
+text = "sdefwe"
+label_settings = SubResource("LabelSettings_best")
+horizontal_alignment = 1
+
+[node name="prompt" type="Label" parent="." unique_id=1056145252]
+offset_top = 214.0
+offset_right = 320.0
+offset_bottom = 236.0
+text = "PRESS ANY KEY TO START"
+label_settings = SubResource("LabelSettings_small")
+horizontal_alignment = 1
+
+[node name="controls" type="Label" parent="." unique_id=637257463]
+offset_top = 226.0
+offset_right = 320.0
+offset_bottom = 248.0
+text = "ARROWS OR WASD"
+label_settings = SubResource("LabelSettings_small")
+horizontal_alignment = 1
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1603255054]
+z_index = -1
+offset_top = 62.0
+offset_right = 424.0
+offset_bottom = 142.0
+color = Color(1, 0.24705882, 0, 0.35686275)
+metadata/_edit_lock_ = true
+
+[node name="Bug" type="Sprite2D" parent="." unique_id=1284305911]
+z_index = -1
+position = Vector2(101.99999, 86)
+scale = Vector2(0.835, 0.8350001)
+texture = ExtResource("4_3xoar")
+
+[node name="Sprite0001" type="Sprite2D" parent="." unique_id=588284670]
+z_index = -2
+texture_filter = 1
+position = Vector2(160, 120)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("5_mom7w")

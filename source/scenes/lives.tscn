@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://c5y7fdr0e6t4d"]
+
+[ext_resource type="Texture2D" uid="uid://b0oys0iaigk4c" path="res://assets/sprites/lives.png" id="1_40ilm"]
+[ext_resource type="Script" uid="uid://brxcd2wsunm3q" path="res://scripts/lives.gd" id="1_xj1q3"]
+
+[node name="Node2D" type="Node2D" unique_id=1958007967]
+script = ExtResource("1_xj1q3")
+
+[node name="life1" type="Sprite2D" parent="." unique_id=1697385882]
+texture_filter = 1
+position = Vector2(-8, 0)
+texture = ExtResource("1_40ilm")
+
+[node name="life2" type="Sprite2D" parent="." unique_id=1961001499]
+texture_filter = 1
+texture = ExtResource("1_40ilm")
+
+[node name="life3" type="Sprite2D" parent="." unique_id=961026390]
+texture_filter = 1
+position = Vector2(8, 0)
+texture = ExtResource("1_40ilm")
