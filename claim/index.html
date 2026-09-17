@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Cable Bug Prize Draw</title>
+<!--
+	Prize-draw entry for kiosk builds (the Pi), which have no page around the game
+	to host the in-game form. The game shows a code and a QR to this page; the
+	player enters the code here on their own phone.
+
+	Published alongside the web build, at /cablebug/claim/ - the QR in
+	assets/sprites/prize_qr.png points here, so moving this page means
+	regenerating that image (tools/make_prize_qr.swift).
+
+	Posts {action:"redeem"} to score-api. The anon key below is the same public,
+	read-the-leaderboard-only key the web build ships with; the function holds
+	the only credential that can write. Its ALLOWED_ORIGINS must include this
+	page's origin.
+-->
+<style>
+:root { color-scheme: dark; }
+body {
+	margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+	background: #000; color: #f2f2f2;
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	padding: 16px; box-sizing: border-box;
+}
+.panel {
+	background: #14161a; width: 100%; max-width: 380px;
+	border: 2px solid #ffd91a; border-radius: 10px; padding: 20px; box-sizing: border-box;
+}
+h1 { margin: 0 0 4px; font-size: 21px; color: #ffd91a; letter-spacing: .5px; }
+.sub { margin: 0 0 16px; font-size: 13px; color: #9aa0a6; }
+label { display: block; font-size: 13px; margin-bottom: 12px; }
+input[type=text], input[type=email] {
+	display: block; width: 100%; box-sizing: border-box; margin-top: 5px;
+	padding: 12px; font-size: 16px; /* 16px stops iOS zooming on focus */
+	border-radius: 6px; border: 1px solid #444; background: #0c0d10; color: #fff;
+}
+#code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 22px; letter-spacing: 3px; text-transform: uppercase; }
+.check { display: flex; gap: 9px; align-items: flex-start; font-size: 12px; color: #c8ccd0; line-height: 1.45; }
+.check input { margin-top: 2px; width: 18px; height: 18px; flex: none; }
+button {
+	width: 100%; margin-top: 18px; padding: 14px 10px; font-size: 15px; font-weight: 600;
+	border-radius: 6px; border: 0; cursor: pointer; min-height: 46px;
+	background: #ffd91a; color: #14161a;
+}
+button[disabled] { opacity: .55; cursor: default; }
+#status { min-height: 18px; margin: 12px 0 0; font-size: 13px; color: #9aa0a6; }
+#status.err { color: #ff7a7a; }
+#status.ok { color: #8ce99a; }
+a { color: #ffd91a; }
+</style>
+</head>
+<body>
+<form class="panel" id="form" novalidate>
+	<h1>CABLE BUG PRIZE DRAW</h1>
+	<p class="sub">Enter the code from the end of your game.</p>
+	<label>Your code<input id="code" type="text" maxlength="9" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="ABC-DEFG" enterkeyhint="next"></label>
+	<label>Name<input id="name" type="text" maxlength="80" autocomplete="name" enterkeyhint="next"></label>
+	<label>Email<input id="email" type="email" maxlength="120" autocomplete="email" inputmode="email" enterkeyhint="done"></label>
+	<label class="check"><input id="consent" type="checkbox"><span>I agree to be contacted about the prize draw. <a href="https://www.ck-tribe.com/privacy-policy" target="_blank" rel="noopener">Privacy notice</a></span></label>
+	<button id="submit" type="submit">Enter</button>
+	<p id="status" role="status"></p>
+</form>
+
+<script>
+(function () {
+	var FUNCTION_URL = "https://obzvqjwwmmrtoqjibpry.supabase.co/functions/v1/score-api";
+	var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ienZxand3bW1ydG9xamlicHJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMzY5MzYsImV4cCI6MjEwMjgxMjkzNn0.VSNeGnd_BAY9qB_4mBIBibYUxozbSCGMSWxYkeudJ1c";
+	// Must match CODE_ALPHABET in score-api.
+	var ALPHABET = "ACEFGHJKMNPRTWXY34679";
+	var LENGTH = 7;
+
+	var el = function (id) { return document.getElementById(id); };
+
+	function clean(raw) {
+		return raw.toUpperCase().replace(/[\s-]/g, "");
+	}
+
+	// Shown as the game prints it, so the two are easy to compare by eye.
+	function pretty(code) {
+		return code.length > 3 ? code.slice(0, 3) + "-" + code.slice(3) : code;
+	}
+
+	function fail(msg) {
+		el("status").textContent = msg;
+		el("status").className = "err";
+		el("submit").disabled = false;
+	}
+
+	// A future QR could carry the code as ?c=, so nobody has to type it.
+	var given = new URLSearchParams(location.search).get("c");
+	if (given) { el("code").value = pretty(clean(given)); }
+
+	el("code").addEventListener("input", function () {
+		el("code").value = pretty(clean(el("code").value).slice(0, LENGTH));
+	});
+
+	el("form").addEventListener("submit", function (e) {
+		e.preventDefault();
+		var code = clean(el("code").value);
+		var name = el("name").value.trim();
+		var email = el("email").value.trim();
+
+		if (code.length !== LENGTH) { fail("Your code is " + LENGTH + " characters long."); return; }
+		for (var i = 0; i < code.length; i++) {
+			if (ALPHABET.indexOf(code[i]) < 0) {
+				fail("Codes never contain " + code[i] + ". Check the screen again - letters like O, D and Q are never used.");
+				return;
+			}
+		}
+		if (name.length < 1) { fail("Please enter your name."); return; }
+		if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { fail("That email doesn't look right."); return; }
+		if (!el("consent").checked) { fail("Please tick the box to enter."); return; }
+
+		el("submit").disabled = true;
+		el("status").className = "";
+		el("status").textContent = "Sending...";
+
+		var ctrl = new AbortController();
+		var timer = setTimeout(function () { ctrl.abort(); }, 8000);
+		fetch(FUNCTION_URL, {
+			method: "POST",
+			headers: {
+				"apikey": ANON_KEY,
+				"Authorization": "Bearer " + ANON_KEY,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ action: "redeem", code: code, full_name: name, email: email, consent: true }),
+			signal: ctrl.signal
+		}).then(function (r) {
+			clearTimeout(timer);
+			if (r.ok) {
+				el("form").querySelectorAll("input").forEach(function (x) { x.disabled = true; });
+				el("status").textContent = "You're in. Good luck!";
+				el("status").className = "ok";
+				return;
+			}
+			if (r.status === 409) { fail("This code has already been entered."); return; }
+			if (r.status === 429) { fail("Too many attempts. Please try again later."); return; }
+			if (r.status === 400) { fail("Please check your details and try again."); return; }
+			fail("Could not send (" + r.status + ").");
+		}).catch(function () {
+			clearTimeout(timer);
+			fail("No connection. Please try again.");
+		});
+	});
+})();
+</script>
+</body>
+</html>
