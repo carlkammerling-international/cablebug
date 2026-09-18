@@ -1,0 +1,11 @@
+[Unit]
+Description=Pin the CPU governor to performance (Cable Bug kiosk)
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

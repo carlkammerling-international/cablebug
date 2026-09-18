@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Cable Bug
+Comment=Trade show kiosk
+Exec=/home/ck-pi/cablebug/run.sh
+Terminal=false
+X-GNOME-Autostart-enabled=true
