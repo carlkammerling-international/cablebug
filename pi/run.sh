@@ -4,6 +4,17 @@
 
 cd "$HOME/cablebug" || exit 1
 
+# Keep the last run's output, so a stand that comes up wrong can be diagnosed
+# after the fact rather than only while watching it.
+exec >> "$HOME/cablebug/run.log" 2>&1
+echo "--- starting $(date) session=${XDG_SESSION_TYPE:-unknown} display=${DISPLAY:-unset}"
+
+# Always draw through X11. Godot 4.6.2's Wayland driver crashes on launch here
+# (godotengine/godot#118157), so if the session ever comes back up as Wayland -
+# switching on desktop auto-login can do that - this goes through Xwayland
+# instead of crash-looping.
+export DISPLAY="${DISPLAY:-:0}"
+
 # The screen must never sleep. A demo playing to an empty hall is not "input",
 # so the desktop would blank the display after ten minutes and the stand would
 # look dead. Belt and braces alongside raspi-config's screen blanking setting.
@@ -24,6 +35,7 @@ fi
 # "until" rather than "while": the game is restarted after a crash, but quitting
 # it deliberately (Alt+F4) leaves the desktop up, so someone on the stand can
 # change the wi-fi or read the screen. A crash still brings it straight back.
-until ./cablebug.arm64 --rendering-driver opengl3_es --fullscreen; do
+until ./cablebug.arm64 --display-driver x11 --rendering-driver opengl3_es --fullscreen; do
+	echo "--- game exited with an error, restarting $(date)"
 	sleep 2
 done
