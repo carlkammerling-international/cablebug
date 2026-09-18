@@ -9,6 +9,15 @@ cd "$HOME/cablebug" || exit 1
 # look dead. Belt and braces alongside raspi-config's screen blanking setting.
 xset s off -dpms 2>/dev/null
 
+# Force 1080p60. A Pi 4 brings a 4K screen up at 30Hz by default, which caps the
+# game at 30fps and costs far more to draw; xrandr changes made by hand do not
+# survive a reboot, so it is done here every launch. The output name is looked up
+# rather than hard-coded, so this works whichever HDMI port is used.
+OUTPUT=$(xrandr | awk '/ connected/{print $1; exit}')
+if [ -n "$OUTPUT" ]; then
+	xrandr --output "$OUTPUT" --mode 1920x1080 --rate 60 2>/dev/null
+fi
+
 # opengl3_es: the Pi has OpenGL ES, not desktop OpenGL. Without this Godot tries
 # desktop GL first, fails, and falls back anyway - this just skips the detour.
 #
