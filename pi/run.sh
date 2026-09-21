@@ -14,13 +14,19 @@ fi
 exec >> "$LOG" 2>&1
 echo "--- starting $(date) session=${XDG_SESSION_TYPE:-unknown} display=${DISPLAY:-unset}"
 
+# Arguments for the game itself, after the -- separator.
+#
+# --invert: the cabinet's stick is wired upside down, so the game swaps its
+# direction bindings to match. DELETE THIS once the stick is rewired, or it will
+# be upside down the other way.
+USER_ARGS="--invert"
+
 # Frame rate readout, for checking the kiosk as it actually runs rather than a
 # copy started by hand - which is a different thing, as two instances at once
 # will both crawl. Turn on with: touch ~/cablebug/DEBUG_FPS  (then restart), and
 # read it back with: grep fps= ~/cablebug/run.log | tail -20
-EXTRA=""
 if [ -f "$HOME/cablebug/DEBUG_FPS" ]; then
-	EXTRA="-- --fps"
+	USER_ARGS="$USER_ARGS --fps"
 fi
 
 # Always draw through X11. Godot 4.6.2's Wayland driver crashes on launch here
@@ -49,7 +55,7 @@ fi
 # "until" rather than "while": the game is restarted after a crash, but quitting
 # it deliberately (Alt+F4) leaves the desktop up, so someone on the stand can
 # change the wi-fi or read the screen. A crash still brings it straight back.
-until ./cablebug.arm64 --display-driver x11 --rendering-driver opengl3_es --fullscreen $EXTRA; do
+until ./cablebug.arm64 --display-driver x11 --rendering-driver opengl3_es --fullscreen -- $USER_ARGS; do
 	echo "--- game exited with an error, restarting $(date)"
 	sleep 2
 done
