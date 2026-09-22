@@ -16,10 +16,10 @@ echo "--- starting $(date) session=${XDG_SESSION_TYPE:-unknown} display=${DISPLA
 
 # Arguments for the game itself, after the -- separator.
 #
-# --invert: the cabinet's stick is wired upside down, so the game swaps its
-# direction bindings to match. DELETE THIS once the stick is rewired, or it will
-# be upside down the other way.
-USER_ARGS="--invert"
+# The cabinet's stick was wired upside down for a while; "--invert" here swapped
+# the direction bindings to match. It has since been rewired, so the flag is
+# gone. Put it back only if a stick is ever wired that way again.
+USER_ARGS=""
 
 # Frame rate readout, for checking the kiosk as it actually runs rather than a
 # copy started by hand - which is a different thing, as two instances at once
